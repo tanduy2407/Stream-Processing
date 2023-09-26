@@ -18,6 +18,7 @@ def create_response_data(url: str='https://randomuser.me/api'):
 
 def create_json_data(result: dict) -> dict:
 	data = {}
+	data['id'] = result['login']['uuid']
 	data['title'] = result['name']['title']
 	data['full_name'] = result['name']['first'] + ' ' + result['name']['last']
 	data['gender'] = result['gender']
@@ -28,6 +29,9 @@ def create_json_data(result: dict) -> dict:
 	data['cell'] = result['cell']
 	data['phone'] = result['phone']
 	data['picture_url'] = result['picture']['large']
+	lat = float(result['location']['coordinates']['latitude'])
+	lon = float(result['location']['coordinates']['longitude'])
+	data['geo'] = {'latitude': lat, 'longitude': lon}
 	return data
 
 

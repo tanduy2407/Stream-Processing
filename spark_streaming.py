@@ -1,62 +1,46 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructField, StructType, StringType, FloatType
+from pyspark.sql import functions as f
 
-
-# def create_spark_session():
-# 	try:
-# 		spark = SparkSession.builder.appName('streaming') \
-# 			.config("spark.jars", "spark-sql-kafka-0-10_2.13-3.3.2.jar") \
-# 			.getOrCreate()
-# 	except Exception as err:
-# 		print(err)
-# 	return spark
-
-
-# def read_stream_data(spark: SparkSession):
-# 	topic = "random_names"
-# 	kafka_bootstrap_server = "localhost:9092"
-# 	try:
-# 		df = spark \
-# 			.readStream \
-# 			.format("kafka") \
-# 			.option("kafka.bootstrap.servers", kafka_bootstrap_server) \
-# 			.option("subscribe", topic) \
-# 			.load()
-# 	except Exception as err:
-# 		print(err)
-# 	return df
-
-
-# if __name__ == "__main__":
-#     spark = create_spark_session()
-#     df = read_stream_data(spark)
-
-#     # Define a simple streaming query to print data to the console
-#     query = df \
-#         .writeStream \
-#         .outputMode("append") \
-#         .format("console") \
-#         .start()
-
-#     query.awaitTermination()
-
-spark = SparkSession.builder.appName('streaming') \
+def create_spark_session():
+	try:
+		spark = SparkSession.builder.appName('streaming') \
 			.getOrCreate()
-topic = "random_names"
-kafka_bootstrap_server = "localhost:9092"
-df = spark \
+	except Exception as err:
+		print(err)
+	return spark
+
+
+def read_stream_data(spark: SparkSession):
+	topic = "random_names"
+	kafka_bootstrap_server = "localhost:9092"
+	try:
+		df = spark \
 			.readStream \
 			.format("kafka") \
 			.option("kafka.bootstrap.servers", kafka_bootstrap_server) \
 			.option("subscribe", topic) \
 			.load()
-#     spark = create_spark_session()
-#     df = read_stream_data(spark)
+	except Exception as err:
+		print(err)
+	return df
 
-#     # Define a simple streaming query to print data to the console
-query = df \
-	.writeStream \
-	.outputMode("append") \
-	.format("console") \
-	.start()
 
-query.awaitTermination()
+def create_dataframe(df):
+	schema = StructType([
+		StructField("id", StringType(), False),
+		StructField("title", StringType(), False),
+		StructField("full_name", StringType(), False),
+		StructField("dob", StringType(), False),
+		StructField("email", StringType(), False),
+		StructField("gender", StringType(), False),
+		StructField("address", StringType(), False),
+		StructField("cell", StringType(), False),
+		StructField("phone", StringType(), False),
+		StructField("picture_url", StringType(), False),
+		StructField("geo", StructType([
+			StructField("latitude", FloatType(), False),
+			StructField("longitude", FloatType(), False)
+		]), False)
+	])
+	df = df.selectExpr("CAST(value AS STRING)").select(f.from_json(f.col("value"),schema).alias("data")).select("data.*")
