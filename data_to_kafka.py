@@ -5,15 +5,17 @@ import time
 import pprint
 import json
 
-def create_response_data(url: str='https://randomuser.me/api'):
-	response = requests.get(f'{url}/?results={randint(1, 10)}')
-	# response = requests.get(f'{url}/?results=1')
 
-	results = response.json()['results']
-	all_kafka_data = []
-	for result in results:
-		all_kafka_data.append(create_json_data(result))
-	return all_kafka_data
+def create_response_data(url: str = 'https://randomuser.me/api'):
+	# response = requests.get(f'{url}/?results={randint(1, 10)}')
+	response = requests.get(f'{url}/?results=1')
+	results = response.json()['results'][0]
+	print(results)
+	kafka_data = create_json_data(results)
+	# kafka_data = []
+	# for result in results:
+	# 	kafka_data.append(create_json_data(result))
+	return kafka_data
 
 
 def create_json_data(result: dict) -> dict:
@@ -38,8 +40,10 @@ def create_json_data(result: dict) -> dict:
 def create_kafka_producer():
 	return KafkaProducer(bootstrap_servers=['localhost:9092'])
 
-def stream_data_to_kafka():
-	pass
+
+def stream_data_to_kafka(producer: KafkaProducer, data, topic: str):
+	producer.send(topic, json.dumps(data).encode(
+		'unicode_escape').decode().encode('utf-8'))
 
 
 def start_streaming():
@@ -47,7 +51,8 @@ def start_streaming():
 	while True:
 		kafka_data = create_response_data()
 		print(kafka_data)
-		producer.send("random_names", json.dumps(kafka_data).encode('unicode_escape').decode().encode('utf-8'))
+		stream_data_to_kafka(producer, kafka_data, 'random_names')
 		time.sleep(uniform(1, 3))
-	
+
+
 start_streaming()
