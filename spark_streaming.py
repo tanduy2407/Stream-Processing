@@ -10,19 +10,15 @@ logging.basicConfig(level=logging.INFO,
 def create_spark_session():
     try:
         spark = SparkSession.builder.appName('streaming') \
-            .config('spark.mongodb.output.uri', 'mongodb://localhost:27017/demo.random_names') \
-            .config('spark.jars.packages', 'org.mongodb.spark:mongo-spark-connector_2.12:3.2.0') \
-            .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0') \
+            .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0') \
             .getOrCreate()
-        # .config('spark.jars', r'D:\PersonalProject\Stream-Processing\mongo-spark-connector_2.12-3.0.1.jar') \
-        # .config('spark.jars', r'D:\PersonalProject\Stream-Processing\spark-sql-kafka-0-10_2.12-3.2.0.jar') \
         logging.info('Spark session created successfully')
     except Exception as err:
         print(err)
     return spark
 
 
-def read_stream_data(spark: SparkSession, topic: str, kafka_bootstrap_server: str = 'localhost:9092') -> DataFrame:
+def read_stream_data(spark: SparkSession, topic: str, kafka_bootstrap_server: str) -> DataFrame:
     try:
         df = spark \
             .readStream \
@@ -60,22 +56,19 @@ def create_dataframe(df: DataFrame):
     return df
 
 
-def write_row(df, df_id):
-    df.write.format('com.mongodb.spark.sql').mode('append').save()
+def stream_to_mongo(df: DataFrame, database: str, collection: str):
+    checkpoint_location = 'checkpoints'
+    query = df.writeStream.format('mongodb') \
+        .option('spark.mongodb.connection.uri', f'mongodb://mongo:27017/{database}.{collection}') \
+        .option("checkpointLocation", checkpoint_location) \
+        .outputMode('append').start()
+    query.awaitTermination()
 
 
-def stream_to_mongo(df: DataFrame):
-    df.writeStream.format('mongodb') \
-        .option('spark.mongodb.connection.uri', 'mongodb://localhost:27017/demo.random_names') \
-        .outputMode('append').start().awaitTermination()
+def streaming():
+	spark = create_spark_session()
+	data = read_stream_data(spark, 'random_names', 'kafka:9092')
+	final_data = create_dataframe(data)
+	stream_to_mongo(final_data, 'kafka_streaming', 'random_names')
 
-    # df.writeStream \
-    # 	.outputMode('append') \
-    # 	.format('console') \
-    # 	.start().awaitTermination()
-
-
-spark = create_spark_session()
-data = read_stream_data(spark, 'random_names')
-final_data = create_dataframe(data)
-final_data.writeStream.foreachBatch(write_row).start().awaitTermination()
+streaming()

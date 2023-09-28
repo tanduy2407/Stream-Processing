@@ -37,8 +37,8 @@ def create_json_data(result: dict) -> dict:
 	return data
 
 
-def create_kafka_producer():
-	return KafkaProducer(bootstrap_servers=['localhost:9092'])
+def create_kafka_producer(server_address: list[str]):
+	return KafkaProducer(bootstrap_servers=server_address)
 
 
 def stream_data_to_kafka(producer: KafkaProducer, data, topic: str):
@@ -47,7 +47,7 @@ def stream_data_to_kafka(producer: KafkaProducer, data, topic: str):
 
 
 def start_streaming():
-	producer = create_kafka_producer()
+	producer = create_kafka_producer(['localhost:9092'])
 	while True:
 		kafka_data = create_response_data()
 		print(kafka_data)
