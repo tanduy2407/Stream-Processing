@@ -10,8 +10,9 @@ logging.basicConfig(level=logging.INFO,
 def create_spark_session():
     try:
         spark = SparkSession.builder.appName('streaming') \
-            .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0') \
+            .config('spark.jars', 'jars/spark-sql-kafka-0-10_2.12-3.2.0.jar,mongo-spark-connector_2.12-3.0.1.jar') \
             .getOrCreate()
+            # .config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0') \
         logging.info('Spark session created successfully')
     except Exception as err:
         print(err)
@@ -57,6 +58,7 @@ def create_dataframe(df: DataFrame):
 
 
 def stream_to_mongo(df: DataFrame, database: str, collection: str):
+    logging.info('Start streaming ...')
     checkpoint_location = 'checkpoints'
     query = df.writeStream.format('mongodb') \
         .option('spark.mongodb.connection.uri', f'mongodb://mongo:27017/{database}.{collection}') \

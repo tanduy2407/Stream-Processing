@@ -21,9 +21,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_ZOOKEEPER_CONNECT: "zoo:2181"
       KAFKA_BROKER_ID: 1
-      # KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
-      # KAFKA_AUTHORIZER_CLASS_NAME: kafka.security.authorizer.AclAuthorizer
-      # KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zoo
     networks:
@@ -43,11 +41,10 @@ services:
       CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
       CONNECT_REST_ADVERTISED_HOST_NAME: 'kafka-connect'
       CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components'
-      # CONNECT_REST_PORT: 8083
-      # CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      # CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      # CONNECT_LOG4J_ROOT_LOGLEVEL: 'INFO'
-      # CONNECT_LOG4J_LOGGERS: 'org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR'
+      CONNECT_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
     networks:
       - kafka-network
 
@@ -62,28 +59,28 @@ services:
     networks:
       - kafka-network
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    ports:
-      - 8888:8080
-    depends_on:
-      - kafka
-      - kafka-connect
-      - schema-registry
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: PLAINTEXT://kafka:19092,PLAINTEXT_HOST://kafka:19092
-      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
-      DYNAMIC_CONFIG_ENABLED: 'true'
-    networks:
-      - kafka-network
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:latest
+  #   ports:
+  #     - 8888:8080
+  #   depends_on:
+  #     - kafka
+  #     - kafka-connect
+  #     - schema-registry
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: local
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: PLAINTEXT://kafka:19092,PLAINTEXT_HOST://kafka:19092
+  #     KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
+  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+  #     DYNAMIC_CONFIG_ENABLED: 'true'
+  #   networks:
+  #     - kafka-network
 
   spark-streaming:
     build: .
     ports:
-      - 8080:8080
+      - 8081:8080
     environment:
       - SPARK_MODE=master
     volumes:
@@ -94,7 +91,7 @@ services:
       - kafka-network
 
   mongodb:
-    image: mongo
+    image: mongo:latest
     restart: always
     ports:
       - 27017:27017
@@ -104,7 +101,7 @@ services:
       MONGO_INITDB_DATABASE: kafka_streaming
       MONGO_INITDB_COLLECTION: random_names
     volumes:
-      - mongo-data:/etc/mongo
+      - mongo-data:/data/db
     networks:
       - kafka-network
 

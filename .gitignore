@@ -1,2 +1,6 @@
 *.jar
 checkpoints
+logs
+plugins
+__pycache__
+postgres_data
