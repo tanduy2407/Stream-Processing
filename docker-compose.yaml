@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
   zoo:
     image: confluentinc/cp-zookeeper:latest
@@ -45,6 +45,9 @@ services:
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+    depends_on:
+      - zoo
+      - kafka
     networks:
       - kafka-network
 
@@ -59,28 +62,28 @@ services:
     networks:
       - kafka-network
 
-  # kafka-ui:
-  #   image: provectuslabs/kafka-ui:latest
-  #   ports:
-  #     - 8888:8080
-  #   depends_on:
-  #     - kafka
-  #     - kafka-connect
-  #     - schema-registry
-  #   environment:
-  #     KAFKA_CLUSTERS_0_NAME: local
-  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: PLAINTEXT://kafka:19092,PLAINTEXT_HOST://kafka:19092
-  #     KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
-  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
-  #     KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
-  #     DYNAMIC_CONFIG_ENABLED: 'true'
-  #   networks:
-  #     - kafka-network
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8888:8080
+    depends_on:
+      - kafka
+      - kafka-connect
+      - schema-registry
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: PLAINTEXT://kafka:19092,PLAINTEXT_HOST://kafka:19092
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: connect
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    networks:
+      - kafka-network
 
   spark-streaming:
-    build: .
+    build: ./spark_streaming
     ports:
-      - 8081:8080
+      - 8082:8080
     environment:
       - SPARK_MODE=master
     volumes:
@@ -98,8 +101,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: kafka_streaming
-      MONGO_INITDB_COLLECTION: random_names
     volumes:
       - mongo-data:/data/db
     networks:
@@ -111,4 +112,3 @@ volumes:
   
 networks:
   kafka-network:
-  airflow-kafka:
