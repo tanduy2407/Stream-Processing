@@ -46,7 +46,7 @@ def stream_data_to_kafka(producer: KafkaProducer, data, topic: str):
 
 
 def start_streaming_to_kafka():
-    producer = create_kafka_producer(['kafka:9092'])
+    producer = create_kafka_producer(['kafka:19092'])
     while True:
         kafka_data = create_response_data()
         print(kafka_data)

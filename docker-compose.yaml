@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   zoo:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.3.2
     ports:
       - 2181:2181
     environment:
@@ -11,7 +11,7 @@ services:
       - kafka-network
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.3.2
     ports:
       - 9092:9092
       - 29092:29092
@@ -28,7 +28,7 @@ services:
       - kafka-network
 
   kafka-connect:
-    image: confluentinc/cp-kafka-connect:latest
+    image: confluentinc/cp-kafka-connect:7.3.2
     ports:
       - 8083:8083
     environment:
@@ -81,12 +81,13 @@ services:
       - kafka-network
 
   spark-streaming:
-    build: ./spark_streaming
+    image: bitnami/spark:3
     ports:
       - 8082:8080
     environment:
       - SPARK_MODE=master
     volumes:
+      - ./spark_streaming/spark_streaming.py:/app/spark_streaming.py
       - spark-data:/app/spark/data
     depends_on:
       - mongodb
@@ -94,7 +95,7 @@ services:
       - kafka-network
 
   mongodb:
-    image: mongo:latest
+    image: mongo:7
     restart: always
     ports:
       - 27017:27017
@@ -103,12 +104,59 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
     volumes:
       - mongo-data:/data/db
+      - ./mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
     networks:
       - kafka-network
 
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    networks:
+      - kafka-network
+
+  webserver:
+    build:
+      context: ./airflow
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      LOAD_EX: n
+      EXECUTOR: Local
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+    ports:
+      - "8080:8080"
+    command: webserver
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "[ -f /usr/local/airflow/airflow-webserver.pid ]"
+        ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - kafka-network
+      
 volumes:
   spark-data:
   mongo-data:
-  
+  postgres_data:
+
 networks:
   kafka-network:
