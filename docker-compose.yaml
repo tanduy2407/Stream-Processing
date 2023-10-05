@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3'
 services:
   zoo:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -52,7 +52,7 @@ services:
       - kafka-network
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:latest
+    image: confluentinc/cp-schema-registry:7.3.2
     ports:
       - 8081:8081
     environment:
@@ -116,10 +116,6 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    logging:
-      options:
-        max-size: 10m
-        max-file: "3"
     networks:
       - kafka-network
 
@@ -132,10 +128,6 @@ services:
     environment:
       LOAD_EX: n
       EXECUTOR: Local
-    logging:
-      options:
-        max-size: 10m
-        max-file: "3"
     volumes:
       - ./dags:/usr/local/airflow/dags
     ports:
