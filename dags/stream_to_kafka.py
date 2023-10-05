@@ -97,10 +97,10 @@ def stream_data_to_kafka(producer: KafkaProducer, data, topic: str):
 
 async def generate_and_stream_data(endpoint: str, topic: str):
     while True:
-        kafka_data = create_kafka_data(endpoint=endpoint)
+        kafka_data = create_kafka_data(endpoint)
         print(topic.upper(), kafka_data)
         # stream_data_to_kafka(producer, kafka_data, topic)
-        await asyncio.sleep(uniform(2, 5))
+        await asyncio.sleep(uniform(1, 5))
 
 
 async def func1():
@@ -124,11 +124,6 @@ async def func5():
 
 
 async def start_streaming_to_kafka():
-    while True:
-        await asyncio.gather(func1(), func2(), func3(), func4(), func5())
-
-
-async def main():
     tasks = []
     for func in [func1, func2, func3, func4, func5]:
         tasks.append(asyncio.create_task(func()))
@@ -137,4 +132,4 @@ async def main():
 if __name__ == "__main__":
     # producer = create_kafka_producer(
     #     ['localhost:9092', 'localhost:9093', 'localhost:9094'])
-    asyncio.run(main())
+    asyncio.run(start_streaming_to_kafka())
