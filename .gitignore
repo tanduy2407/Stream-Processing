@@ -1,5 +1,5 @@
 *.jar
-checkpoints
+checkpoints*
 logs
 plugins
 __pycache__
