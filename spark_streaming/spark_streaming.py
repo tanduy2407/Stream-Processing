@@ -17,7 +17,7 @@ class SparkStreamProcessor:
 		self.collection = collection
 		self.spark = self.create_spark_session()
 
-	def create_spark_session(self):
+	def create_spark_session(self) -> SparkSession:
 		try:
 			spark = SparkSession.builder.appName('streaming') \
 				.config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0') \
@@ -42,7 +42,7 @@ class SparkStreamProcessor:
 			logging.info('ERROR:', err)
 		return df
 
-	def create_dataframe(self, df: DataFrame):
+	def create_dataframe(self, df: DataFrame) -> DataFrame:
 		if self.namespace == 'beer/random_beer':
 			schema = StructType([
 				StructField('id', StringType(), False),
@@ -137,55 +137,49 @@ class SparkStreamProcessor:
 		query.awaitTermination()
 
 	# .option('spark.mongodb.connection.uri', f'mongodb://user:password@mongodb:27017/{database}.{collection}') \
-	def process_stream(self):
-		data = self.read_stream_data()
-		final_data = self.create_dataframe(data)
-		self.stream_to_mongo(final_data)
+
+
+async def process_stream_to_mongodb(bootstrap_servers, topic, namespace, db_name, collection):
+	processor = SparkStreamProcessor(
+		bootstrap_servers, topic, namespace, db_name, collection)
+	data = processor.read_stream_data()
+	final_data = processor.create_dataframe(data)
+	processor.stream_to_mongo(final_data)
 
 
 async def func1():
 	bootstrap_servers = 'localhost:9092'
-	namespace = 'vehicle/random_vehicle'
-	topic = collection_name = namespace.split('/')[1]
-	processor = SparkStreamProcessor(
-		bootstrap_servers, topic, namespace, database_name, collection_name)
-	processor.process_stream()
+	namespace = 'beer/random_beer'
+	topic = collection = namespace.split('/')[1]
+	await process_stream_to_mongodb(bootstrap_servers, topic, namespace, db_name, collection)
 
 
 async def func2():
 	bootstrap_servers = 'localhost:9092'
 	namespace = 'cannabis/random_cannabis'
-	topic = collection_name = namespace.split('/')[1]
-	processor = SparkStreamProcessor(
-		bootstrap_servers, topic, namespace, database_name, collection_name)
-	processor.process_stream()
+	topic = collection = namespace.split('/')[1]
+	await process_stream_to_mongodb(bootstrap_servers, topic, namespace, db_name, collection)
 
 
 async def func3():
 	bootstrap_servers = 'localhost:9092'
-	namespace = 'beer/random_beer'
-	topic = collection_name = namespace.split('/')[1]
-	processor = SparkStreamProcessor(
-		bootstrap_servers, topic, namespace, database_name, collection_name)
-	processor.process_stream()
+	namespace = 'vehicle/random_vehicle'
+	topic = collection = namespace.split('/')[1]
+	await process_stream_to_mongodb(bootstrap_servers, topic, namespace, db_name, collection)
 
 
 async def func4():
 	bootstrap_servers = 'localhost:9092'
 	namespace = 'restaurant/random_restaurant'
-	topic = collection_name = namespace.split('/')[1]
-	processor = SparkStreamProcessor(
-		bootstrap_servers, topic, namespace, database_name, collection_name)
-	processor.process_stream()
+	topic = collection = namespace.split('/')[1]
+	await process_stream_to_mongodb(bootstrap_servers, topic, namespace, db_name, collection)
 
 
 async def func5():
 	bootstrap_servers = 'localhost:9092'
-	namespace = 'users/random_user'
-	topic = collection_name = namespace.split('/')[1]
-	processor = SparkStreamProcessor(
-		bootstrap_servers, topic, namespace, database_name, collection_name)
-	processor.process_stream()
+	namespace = 'user/random_user'
+	topic = collection = namespace.split('/')[1]
+	await process_stream_to_mongodb(bootstrap_servers, topic, namespace, db_name, collection)
 
 
 async def streaming():
@@ -195,5 +189,5 @@ async def streaming():
 	await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
-	database_name = 'kafka_streaming'
-	streaming()
+	db_name = 'kafka_streaming'
+	asyncio.run(streaming())
