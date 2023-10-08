@@ -7,6 +7,13 @@ from datetime import datetime
 
 
 class KafkaStreamData:
+	"""
+	Generates random data for specified endpoints and formats it for Kafka streaming.
+	
+	Args:
+		endpoint (str): The type of data endpoint, e.g., 'beer/random_beer'.
+		topic (str): The Kafka topic to which the data will be streamed.
+	"""
 	def __init__(self, endpoint: str, topic: str):
 		valid_endpoints = ['beer/random_beer', 'cannabis/random_cannabis',
 						   'vehicle/random_vehicle', 'restaurant/random_restaurant', 'users/random_user']
@@ -18,6 +25,12 @@ class KafkaStreamData:
 		self.topic = topic
 
 	def create_kafka_data(self):
+		"""
+		Fetches random data from the specified endpoint and formats it for Kafka streaming.
+		
+		Returns:
+			dict: Formatted data for Kafka streaming.
+		"""
 		response = requests.get(f'{self.url}/{self.endpoint}?size=1')
 		results = response.json()[0]
 		# kafka_data = []
@@ -26,6 +39,15 @@ class KafkaStreamData:
 		return self.create_json_data(results)
 
 	def create_json_data(self, result: dict) -> dict:
+		"""
+		Formats the random data into JSON format for Kafka streaming.
+		
+		Args:
+			result (dict): Raw random data fetched from the API.
+		
+		Returns:
+			dict: Formatted JSON data for Kafka streaming.
+		"""
 		data = {}
 		if self.endpoint == 'beer/random_beer':
 			data['id'] = result['id']
@@ -93,17 +115,31 @@ class KafkaStreamData:
 		return data
 
 	def stream_data_to_kafka(self, producer: KafkaProducer, data):
+		"""
+		Streams the formatted data to Kafka topic using the provided Kafka producer.
+		
+		Args:
+			producer (KafkaProducer): Kafka producer instance.
+			data (dict): Formatted data for Kafka streaming.
+		"""
 		producer.send(self.topic, json.dumps(data).encode(
 			'unicode_escape').decode().encode('utf-8'))
 
 
 async def generate_and_stream_data(producer: KafkaProducer, endpoint: str, topic: str):
+	"""
+	Generates random data and streams it to the specified Kafka topic.
+	
+	Args:
+		producer (KafkaProducer): Kafka producer instance.
+		endpoint (str): The type of data endpoint, e.g., 'beer/random_beer'.
+		topic (str): The Kafka topic to which the data will be streamed.
+	"""
 	while True:
 		kafka_stream = KafkaStreamData(endpoint, topic)
 		kafka_data = kafka_stream.create_kafka_data()
 		print(topic.upper(), kafka_data)
 		kafka_stream.stream_data_to_kafka(producer, kafka_data)
-		print('stream')
 		await asyncio.sleep(uniform(1, 5))
 
 
