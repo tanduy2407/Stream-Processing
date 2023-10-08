@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO,
 
 
 class SparkStreamProcessor:
-	def __init__(self, spark: SparkSession, bootstrap_servers: str, topic: str, namespace: str, database: str, collection: str):
+	def __init__(self, bootstrap_servers: str, topic: str, namespace: str, database: str, collection: str):
 		"""
 		Initializes the SparkStreamProcessor with required parameters.
 
@@ -21,12 +21,28 @@ class SparkStreamProcessor:
 			database (str): MongoDB database name.
 			collection (str): MongoDB collection name.
 		"""
-		self.spark = spark
+		self.spark = self.create_spark_session()
 		self.bootstrap_servers = bootstrap_servers
 		self.topic = topic
 		self.namespace = namespace
 		self.database = database
 		self.collection = collection
+
+	def create_spark_session(self) -> SparkSession:
+		"""
+		Creates and configures a SparkSession for processing streaming data.
+
+		Returns:
+			SparkSession: Configured SparkSession object.
+		"""
+		try:
+			spark = SparkSession.builder.appName('streaming') \
+				.config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0') \
+				.getOrCreate()
+			logging.info('Spark session created successfully')
+		except Exception as err:
+			logging.info(err)
+		return spark
 
 	def read_stream_data(self) -> DataFrame:
 		"""
@@ -34,7 +50,7 @@ class SparkStreamProcessor:
 
 		Returns:
 			DataFrame: Initial DataFrame containing streaming data from Kafka.
-    	"""
+		"""
 		try:
 			df = self.spark \
 				.readStream \
@@ -58,7 +74,7 @@ class SparkStreamProcessor:
 
 		Returns:
 			DataFrame: Processed DataFrame with appropriate schema and formatted timestamps.
-    	"""
+		"""
 		if self.namespace == 'beer/random_beer':
 			schema = StructType([
 				StructField('id', StringType(), False),
@@ -151,46 +167,33 @@ class SparkStreamProcessor:
 			df (DataFrame): Processed DataFrame with data to be streamed to MongoDB.
 		"""
 		logging.info('Start streaming ...')
+		user = 'kafka_streaming'
+		passwd = 'kafka_streaming'
+		host = 'mongodb'
+		port = 27017
+		db = self.database
+		collection = self.collection
 		checkpoint = 'checkpoints_' + self.collection
 		query = df.writeStream.format('mongodb') \
-			.option('spark.mongodb.connection.uri', f'mongodb://localhost:27017/{self.database}.{self.collection}') \
+			.option('spark.mongodb.connection.uri', f'mongodb://{user}:{passwd}@{host}:{port}/{db}.{collection}') \
 			.option('checkpointLocation', checkpoint) \
 			.outputMode('append').start()
 		query.awaitTermination()
-	# .option('spark.mongodb.connection.uri', f'mongodb://user:password@mongodb:27017/{database}.{collection}') \
-
-
-def create_spark_session() -> SparkSession:
-	"""
-    Creates and configures a SparkSession for processing streaming data.
-
-    Returns:
-        SparkSession: Configured SparkSession object.
-    """
-	try:
-		spark = SparkSession.builder.appName('streaming') \
-			.config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0') \
-			.getOrCreate()
-		logging.info('Spark session created successfully')
-	except Exception as err:
-		logging.info(err)
-	return spark
 
 
 def process_stream(bootstrap_servers, topic, namespace, db_name, collection):
 	"""
-    Process streaming data from Kafka and store it in MongoDB.
+	Process streaming data from Kafka and store it in MongoDB.
 
-    Args:
-        bootstrap_servers (str): Kafka bootstrap servers.
-        topic (str): Kafka topic to subscribe to.
-        namespace (str): Namespace for the data.
-        db_name (str): MongoDB database name.
-        collection (str): MongoDB collection name.
-    """
-	spark = create_spark_session()
+	Args:
+		bootstrap_servers (str): Kafka bootstrap servers.
+		topic (str): Kafka topic to subscribe to.
+		namespace (str): Namespace for the data.
+		db_name (str): MongoDB database name.
+		collection (str): MongoDB collection name.
+	"""
 	processor = SparkStreamProcessor(
-		spark, bootstrap_servers, topic, namespace, db_name, collection)
+		bootstrap_servers, topic, namespace, db_name, collection)
 	data = processor.read_stream_data()
 	final_data = processor.create_dataframe(data)
 	processor.stream_to_mongo(final_data)
@@ -200,12 +203,13 @@ if __name__ == "__main__":
 	db_name = 'kafka_streaming'
 	bootstrap_servers = 'localhost:9092'
 	namespaces = ['beer/random_beer', 'cannabis/random_cannabis', 'vehicle/random_vehicle',
-			   'restaurant/random_restaurant', 'users/random_user']
+				  'restaurant/random_restaurant', 'users/random_user']
 
 	processes = []
 	for namespace in namespaces:
 		topic = collection = namespace.split('/')[1]
-		process = multiprocessing.Process(target=process_stream, args=(bootstrap_servers, topic, namespace, db_name, collection))
+		process = multiprocessing.Process(target=process_stream, args=(
+			bootstrap_servers, topic, namespace, db_name, collection))
 		process.start()
 		processes.append(process)
 

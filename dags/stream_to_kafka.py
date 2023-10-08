@@ -7,13 +7,6 @@ from datetime import datetime
 
 
 class KafkaStreamData:
-	"""
-	Generates random data for specified namespaces and formats it for Kafka streaming.
-	
-	Args:
-		namespace (str): The type of data namespace, e.g., 'beer/random_beer'.
-		topic (str): The Kafka topic to which the data will be streamed.
-	"""
 	def __init__(self, namespace: str, topic: str):
 		"""
 		Generates random data for specified namespaces and formats it for Kafka streaming.
@@ -180,9 +173,9 @@ def main():
 	asyncio.run(streaming_kafka())
 	
 if __name__ == "__main__":
-	producer1 = KafkaProducer(bootstrap_servers=['127.0.0.1:9092'])
-	producer2 = KafkaProducer(bootstrap_servers=['127.0.0.1:9093'])
-	producer3 = KafkaProducer(bootstrap_servers=['127.0.0.1:9094'])
+	producer1 = KafkaProducer(bootstrap_servers=['kafka1:19092'])
+	# producer2 = KafkaProducer(bootstrap_servers=['127.0.0.1:9093'])
+	# producer3 = KafkaProducer(bootstrap_servers=['127.0.0.1:9094'])
 	main()
 	
 

@@ -12,7 +12,7 @@ collectionNames.forEach(collectionName => {
 
 // Create a new user with dbOwner role for the specified database
 db.createUser({
-  user: 'user',
-  pwd: 'password',
+  user: 'kafka_streaming',
+  pwd: 'kafka_streaming',
   roles: [{ role: 'dbOwner', db: dbName }]
 });
