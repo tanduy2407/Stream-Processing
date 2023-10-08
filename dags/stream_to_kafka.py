@@ -8,30 +8,37 @@ from datetime import datetime
 
 class KafkaStreamData:
 	"""
-	Generates random data for specified endpoints and formats it for Kafka streaming.
+	Generates random data for specified namespaces and formats it for Kafka streaming.
 	
 	Args:
-		endpoint (str): The type of data endpoint, e.g., 'beer/random_beer'.
+		namespace (str): The type of data namespace, e.g., 'beer/random_beer'.
 		topic (str): The Kafka topic to which the data will be streamed.
 	"""
-	def __init__(self, endpoint: str, topic: str):
-		valid_endpoints = ['beer/random_beer', 'cannabis/random_cannabis',
+	def __init__(self, namespace: str, topic: str):
+		"""
+		Generates random data for specified namespaces and formats it for Kafka streaming.
+		
+		Args:
+			namespace (str): The type of data namespace, e.g., 'beer/random_beer'.
+			topic (str): The Kafka topic to which the data will be streamed.
+		"""
+		valid_namespaces = ['beer/random_beer', 'cannabis/random_cannabis',
 						   'vehicle/random_vehicle', 'restaurant/random_restaurant', 'users/random_user']
-		if endpoint not in valid_endpoints:
-			raise ValueError('Invalid endpoint. Must be one of: ' +
-							 ', '.join(valid_endpoints))
-		self.endpoint = endpoint
+		if namespace not in valid_namespaces:
+			raise ValueError('Invalid namespace. Must be one of: ' +
+							 ', '.join(valid_namespaces))
+		self.namespace = namespace
 		self.url = 'https://random-data-api.com/api/'
 		self.topic = topic
 
 	def create_kafka_data(self):
 		"""
-		Fetches random data from the specified endpoint and formats it for Kafka streaming.
+		Fetches random data from the specified namespace and formats it for Kafka streaming.
 		
 		Returns:
 			dict: Formatted data for Kafka streaming.
 		"""
-		response = requests.get(f'{self.url}/{self.endpoint}?size=1')
+		response = requests.get(f'{self.url}/{self.namespace}?size=1')
 		results = response.json()[0]
 		# kafka_data = []
 		# for result in results:
@@ -49,7 +56,7 @@ class KafkaStreamData:
 			dict: Formatted JSON data for Kafka streaming.
 		"""
 		data = {}
-		if self.endpoint == 'beer/random_beer':
+		if self.namespace == 'beer/random_beer':
 			data['id'] = result['id']
 			data['brand'] = result['brand']
 			data['name'] = result['name']
@@ -61,7 +68,7 @@ class KafkaStreamData:
 			data['ibu'] = result['ibu']
 			data['blg'] = result['blg']
 
-		if self.endpoint == 'cannabis/random_cannabis':
+		if self.namespace == 'cannabis/random_cannabis':
 			data['id'] = result['id']
 			data['strain'] = result['strain']
 			data['cannabinoid'] = result['cannabinoid']
@@ -71,7 +78,7 @@ class KafkaStreamData:
 			data['category'] = result['category']
 			data['brand'] = result['brand']
 
-		if self.endpoint == 'vehicle/random_vehicle':
+		if self.namespace == 'vehicle/random_vehicle':
 			data['id'] = result['id']
 			data['model'] = result['make_and_model']
 			data['color'] = result['color']
@@ -84,7 +91,7 @@ class KafkaStreamData:
 			data['kilometrage'] = result['kilometrage']
 			data['license_plate'] = result['license_plate']
 
-		if self.endpoint == 'restaurant/random_restaurant':
+		if self.namespace == 'restaurant/random_restaurant':
 			data['id'] = result['id']
 			data['name'] = result['name']
 			data['description'] = result['description']
@@ -93,7 +100,7 @@ class KafkaStreamData:
 			data['phone_number'] = result['phone_number']
 			data['address'] = result['address']
 
-		if self.endpoint == 'users/random_user':
+		if self.namespace == 'users/random_user':
 			data['id'] = result['id']
 			data['full_name'] = result['first_name'] + \
 				' ' + result['last_name']
@@ -126,17 +133,17 @@ class KafkaStreamData:
 			'unicode_escape').decode().encode('utf-8'))
 
 
-async def generate_and_stream_data(producer: KafkaProducer, endpoint: str, topic: str):
+async def generate_and_stream_data(producer: KafkaProducer, namespace: str, topic: str):
 	"""
 	Generates random data and streams it to the specified Kafka topic.
 	
 	Args:
 		producer (KafkaProducer): Kafka producer instance.
-		endpoint (str): The type of data endpoint, e.g., 'beer/random_beer'.
+		namespace (str): The type of data namespace, e.g., 'beer/random_beer'.
 		topic (str): The Kafka topic to which the data will be streamed.
 	"""
 	while True:
-		kafka_stream = KafkaStreamData(endpoint, topic)
+		kafka_stream = KafkaStreamData(namespace, topic)
 		kafka_data = kafka_stream.create_kafka_data()
 		print(topic.upper(), kafka_data)
 		kafka_stream.stream_data_to_kafka(producer, kafka_data)
@@ -174,10 +181,8 @@ def main():
 	
 if __name__ == "__main__":
 	producer1 = KafkaProducer(bootstrap_servers=['127.0.0.1:9092'])
-	# producer2 = create_kafka_producer(
-	# 	['127.0.0.1:9093'])
-	# producer3 = create_kafka_producer(
-	# 	['127.0.0.1:9094'])
+	producer2 = KafkaProducer(bootstrap_servers=['127.0.0.1:9093'])
+	producer3 = KafkaProducer(bootstrap_servers=['127.0.0.1:9094'])
 	main()
 	
 
