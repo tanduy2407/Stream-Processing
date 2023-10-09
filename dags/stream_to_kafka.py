@@ -15,8 +15,8 @@ class KafkaStreamData:
 			namespace (str): The type of data namespace, e.g., 'beer/random_beer'.
 			topic (str): The Kafka topic to which the data will be streamed.
 		"""
-		valid_namespaces = ['beer/random_beer', 'cannabis/random_cannabis',
-						   'vehicle/random_vehicle', 'restaurant/random_restaurant', 'users/random_user']
+		valid_namespaces = ['beer/random_beer', 'cannabis/random_cannabis', 'company/random_company', 
+						    'vehicle/random_vehicle', 'restaurant/random_restaurant', 'users/random_user']
 		if namespace not in valid_namespaces:
 			raise ValueError('Invalid namespace. Must be one of: ' +
 							 ', '.join(valid_namespaces))
@@ -111,6 +111,18 @@ class KafkaStreamData:
 			lat = float(address['coordinates']['lat'])
 			lon = float(address['coordinates']['lng'])
 			data['geo'] = {'latitude': lat, 'longitude': lon}
+
+		if self.namespace == 'company/random_company':
+			data['id'] = result['id']
+			data['business_name'] = result['business_name']
+			data['suffix'] = result['suffix']
+			data['industry'] = result['industry']
+			data['employee_id_number'] = result['employee_identification_number']
+			data['duns_number'] = result['duns_number']
+			data['logo'] = result['logo']
+			data['type'] = result['type']
+			data['address'] = result['full_address']
+			data['geo'] = {'latitude': result['latitude'], 'longitude': result['longitude']}
 		data['insert_timestamp'] = str(datetime.now())
 		return data
 

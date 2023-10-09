@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.types import StructField, StructType, StringType, FloatType, ArrayType, TimestampType
+from pyspark.sql import types as t
 from pyspark.sql import functions as f
 import logging
 import multiprocessing
@@ -37,7 +37,6 @@ class SparkStreamProcessor:
 		"""
 		try:
 			spark = SparkSession.builder.appName('streaming') \
-				.config('spark.jars.packages', 'org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0') \
 				.getOrCreate()
 			logging.info('Spark session created successfully')
 		except Exception as err:
@@ -76,83 +75,100 @@ class SparkStreamProcessor:
 			DataFrame: Processed DataFrame with appropriate schema and formatted timestamps.
 		"""
 		if self.namespace == 'beer/random_beer':
-			schema = StructType([
-				StructField('id', StringType(), False),
-				StructField('brand', StringType(), False),
-				StructField('name', StringType(), False),
-				StructField('style', StringType(), False),
-				StructField('hop', StringType(), False),
-				StructField('yeast', StringType(), False),
-				StructField('malts', StringType(), False),
-				StructField('alcohol', StringType(), False),
-				StructField('ibu', StringType(), False),
-				StructField('blg', StringType(), False),
-				StructField('insert_timestamp', TimestampType(), False)
+			schema = t.StructType([
+				t.StructField('id', t.IntegerType(), False),
+				t.StructField('brand', t.StringType(), False),
+				t.StructField('name', t.StringType(), False),
+				t.StructField('style', t.StringType(), False),
+				t.StructField('hop', t.StringType(), False),
+				t.StructField('yeast', t.StringType(), False),
+				t.StructField('malts', t.StringType(), False),
+				t.StructField('alcohol', t.StringType(), False),
+				t.StructField('ibu', t.StringType(), False),
+				t.StructField('blg', t.StringType(), False),
+				t.StructField('insert_timestamp', t.t.TimestampType(), False)
 			])
 
 		if self.namespace == 'cannabis/random_cannabis':
-			schema = StructType([
-				StructField('id', StringType(), False),
-				StructField('strain', StringType(), False),
-				StructField('cannabinoid', StringType(), False),
-				StructField('terpene', StringType(), False),
-				StructField('medical_use', StringType(), False),
-				StructField('health_benefit', StringType(), False),
-				StructField('category', StringType(), False),
-				StructField('brand', StringType(), False),
-				StructField('insert_timestamp', TimestampType(), False)
+			schema = t.StructType([
+				t.StructField('id', t.IntegerType(), False),
+				t.StructField('strain', t.StringType(), False),
+				t.StructField('cannabinoid', t.StringType(), False),
+				t.StructField('terpene', t.StringType(), False),
+				t.StructField('medical_use', t.StringType(), False),
+				t.StructField('health_benefit', t.StringType(), False),
+				t.StructField('category', t.StringType(), False),
+				t.StructField('brand', t.StringType(), False),
+				t.StructField('insert_timestamp', t.t.TimestampType(), False)
 			])
 
 		if self.namespace == 'vehicle/random_vehicle':
-			schema = StructType([
-				StructField('id', StringType(), False),
-				StructField('model', StringType(), False),
-				StructField('color', StringType(), False),
-				StructField('transmission', StringType(), False),
-				StructField('drive_type', StringType(), False),
-				StructField('fuel_type', StringType(), False),
-				StructField('car_type', StringType(), False),
-				StructField('car_options', ArrayType(
-					StringType(), containsNull=False)),
-				StructField('specs', ArrayType(
-					StringType(), containsNull=False)),
-				StructField('kilometrage', StringType(), False),
-				StructField('license_plate', StringType(), False),
-				StructField('insert_timestamp', TimestampType(), False)
+			schema = t.StructType([
+				t.StructField('id', t.IntegerType(), False),
+				t.StructField('model', t.StringType(), False),
+				t.StructField('color', t.StringType(), False),
+				t.StructField('transmission', t.StringType(), False),
+				t.StructField('drive_type', t.StringType(), False),
+				t.StructField('fuel_type', t.StringType(), False),
+				t.StructField('car_type', t.StringType(), False),
+				t.StructField('car_options', t.ArrayType(
+					t.StringType(), containsNull=False)),
+				t.StructField('specs', t.ArrayType(
+					t.StringType(), containsNull=False)),
+				t.StructField('kilometrage', t.StringType(), False),
+				t.StructField('license_plate', t.StringType(), False),
+				t.StructField('insert_timestamp', t.t.TimestampType(), False)
 			])
 
 		if self.namespace == 'restaurant/random_restaurant':
-			schema = StructType([
-				StructField('id', StringType(), False),
-				StructField('name', StringType(), False),
-				StructField('description', StringType(), False),
-				StructField('review', StringType(), False),
-				StructField('logo', StringType(), False),
-				StructField('phone_number', StringType(), False),
-				StructField('address', StringType(), False),
-				StructField('insert_timestamp', TimestampType(), False)
+			schema = t.StructType([
+				t.StructField('id', t.IntegerType(), False),
+				t.StructField('name', t.StringType(), False),
+				t.StructField('description', t.StringType(), False),
+				t.StructField('review', t.StringType(), False),
+				t.StructField('logo', t.StringType(), False),
+				t.StructField('phone_number', t.StringType(), False),
+				t.StructField('address', t.StringType(), False),
+				t.StructField('insert_timestamp', t.TimestampType(), False)
 			])
 
 		if self.namespace == 'users/random_user':
-			schema = StructType([
-				StructField('id', StringType(), False),
-				StructField('full_name', StringType(), False),
-				StructField('gender', StringType(), False),
-				StructField('date_of_birth', StringType(), False),
-				StructField('email', StringType(), False),
-				StructField('address', StringType(), False),
-				StructField('phone_number', StringType(), False),
-				StructField('avatar', StringType(), False),
-				StructField('social_insurance_number', StringType(), False),
-				StructField('employment', StringType(), False),
-				StructField('credit_card', StringType(), False),
-				StructField('geo', StructType([
-					StructField('latitude', FloatType(), False),
-					StructField('longitude', FloatType(), False)
+			schema = t.StructType([
+				t.StructField('id', t.IntegerType(), False),
+				t.StructField('full_name', t.StringType(), False),
+				t.StructField('gender', t.StringType(), False),
+				t.StructField('date_of_birth', t.StringType(), False),
+				t.StructField('email', t.StringType(), False),
+				t.StructField('address', t.StringType(), False),
+				t.StructField('phone_number', t.StringType(), False),
+				t.StructField('avatar', t.StringType(), False),
+				t.StructField('social_insurance_number', t.StringType(), False),
+				t.StructField('employment', t.StringType(), False),
+				t.StructField('credit_card', t.StringType(), False),
+				t.StructField('geo', t.StructType([
+					t.StructField('latitude', t.FloatType(), False),
+					t.StructField('longitude', t.FloatType(), False)
 				]), False),
-				StructField('insert_timestamp', TimestampType(), False)
+				t.StructField('insert_timestamp', t.TimestampType(), False)
 			])
 
+		if self.namespace == 'company/random_company':
+			schema = t.StructType([
+				t.StructField('id', t.IntegerType(), False),
+				t.StructField('business_name', t.StringType(), False),
+				t.StructField('suffix', t.StringType(), False),
+				t.StructField('industry', t.StringType(), False),
+				t.StructField('employee_id_number', t.StringType(), False),
+				t.StructField('duns_number', t.StringType(), False),
+				t.StructField('logo', t.StringType(), False),
+				t.StructField('type', t.StringType(), False),
+				t.StructField('address', t.StringType(), False),
+				t.StructField('geo', t.StructType([
+					t.StructField('latitude', t.FloatType(), False),
+					t.StructField('longitude', t.FloatType(), False)
+				]), False),
+				t.StructField('insert_timestamp', t.TimestampType(), False)
+			])
 		df = df.selectExpr('CAST(value AS STRING)').select(
 			f.from_json(f.col('value'), schema).alias('data')).select('data.*')
 		df = df.withColumn('insert_timestamp', f.date_format(
@@ -202,8 +218,7 @@ def process_stream(bootstrap_servers, topic, namespace, db_name, collection):
 if __name__ == "__main__":
 	db_name = 'kafka_streaming'
 	bootstrap_servers = 'localhost:9092'
-	namespaces = ['beer/random_beer', 'cannabis/random_cannabis', 'vehicle/random_vehicle',
-				  'restaurant/random_restaurant', 'users/random_user']
+	namespaces = ['beer/random_beer', 'cannabis/random_cannabis']
 
 	processes = []
 	for namespace in namespaces:
@@ -215,3 +230,7 @@ if __name__ == "__main__":
 
 	for process in processes:
 		process.join()
+
+#spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0 spark_streaming.py
+
+#spark-submit --master local[2] --jars spark-sql-kafka-0-10_2.12-3.3.0.jar,mongo-spark-connector_2.12-10.2.0.jar spark_streaming.py
