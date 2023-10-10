@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import types as t
 from pyspark.sql import functions as f
 import logging
-import multiprocessing
+import sys
 
 logging.basicConfig(level=logging.INFO,
 					format='%(asctime)s:%(funcName)s:%(levelname)s:%(message)s')
@@ -29,20 +29,20 @@ class SparkStreamProcessor:
 		self.collection = collection
 
 	def create_spark_session(self) -> SparkSession:
-		"""
-		Creates and configures a SparkSession for processing streaming data.
+			"""
+			Creates and configures a SparkSession for processing streaming data.
 
-		Returns:
-			SparkSession: Configured SparkSession object.
-		"""
-		try:
-			spark = SparkSession.builder.appName('streaming') \
-				.getOrCreate()
-			logging.info('Spark session created successfully')
-		except Exception as err:
-			logging.info(err)
-		return spark
-
+			Returns:
+				SparkSession: Configured SparkSession object.
+			"""
+			try:
+				spark = SparkSession.builder.appName('streaming') \
+					.getOrCreate()
+				logging.info('Spark session created successfully')
+			except Exception as err:
+				logging.info(err)
+			return spark
+	
 	def read_stream_data(self) -> DataFrame:
 		"""
 		Reads streaming data from Kafka and creates an initial DataFrame.
@@ -86,7 +86,7 @@ class SparkStreamProcessor:
 				t.StructField('alcohol', t.StringType(), False),
 				t.StructField('ibu', t.StringType(), False),
 				t.StructField('blg', t.StringType(), False),
-				t.StructField('insert_timestamp', t.t.TimestampType(), False)
+				t.StructField('insert_timestamp', t.TimestampType(), False)
 			])
 
 		if self.namespace == 'cannabis/random_cannabis':
@@ -99,7 +99,7 @@ class SparkStreamProcessor:
 				t.StructField('health_benefit', t.StringType(), False),
 				t.StructField('category', t.StringType(), False),
 				t.StructField('brand', t.StringType(), False),
-				t.StructField('insert_timestamp', t.t.TimestampType(), False)
+				t.StructField('insert_timestamp', t.TimestampType(), False)
 			])
 
 		if self.namespace == 'vehicle/random_vehicle':
@@ -117,7 +117,7 @@ class SparkStreamProcessor:
 					t.StringType(), containsNull=False)),
 				t.StructField('kilometrage', t.StringType(), False),
 				t.StructField('license_plate', t.StringType(), False),
-				t.StructField('insert_timestamp', t.t.TimestampType(), False)
+				t.StructField('insert_timestamp', t.TimestampType(), False)
 			])
 
 		if self.namespace == 'restaurant/random_restaurant':
@@ -216,21 +216,18 @@ def process_stream(bootstrap_servers, topic, namespace, db_name, collection):
 
 
 if __name__ == "__main__":
-	db_name = 'kafka_streaming'
-	bootstrap_servers = 'localhost:9092'
-	namespaces = ['beer/random_beer', 'cannabis/random_cannabis']
+	bootstrap_servers = sys.argv[1]
+	db_name = sys.argv[2]
+	namespace = sys.argv[3]
+	print('NAMESPACE:', namespace)
+	topic = collection = namespace.split('/')[1]
 
-	processes = []
-	for namespace in namespaces:
-		topic = collection = namespace.split('/')[1]
-		process = multiprocessing.Process(target=process_stream, args=(
-			bootstrap_servers, topic, namespace, db_name, collection))
-		process.start()
-		processes.append(process)
-
-	for process in processes:
-		process.join()
+	print(topic)
+	print(collection)
+	process_stream(bootstrap_servers, topic, namespace, db_name, collection)
 
 #spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0 spark_streaming.py
 
 #spark-submit --master local[2] --jars spark-sql-kafka-0-10_2.12-3.3.0.jar,mongo-spark-connector_2.12-10.2.0.jar spark_streaming.py
+
+#spark-submit --master local[2] spark_streaming.py kafka_streaming localhost:9092 beer/random_beer

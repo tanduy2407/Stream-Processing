@@ -1,0 +1,62 @@
+version: '3'
+services:
+  spark-master:
+    image: 'bitnami/spark:3'
+    ports:
+      - '8081:8080'
+      - '7077:7077'
+    environment:
+      - SPARK_MODE=master
+    networks:
+      - kafka-network
+
+  spark-worker-1:
+    build:
+      context: ./spark_streaming/random_beer
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    volumes:
+      - ./spark_streaming/spark_streaming.py:/app/spark_streaming.py
+    depends_on:
+      - spark-master
+    networks:
+      - kafka-network
+
+  spark-worker-2:
+    build:
+      context: ./spark_streaming/random_cannabis
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    volumes:
+      - ./spark_streaming/spark_streaming.py:/app/spark_streaming.py
+    depends_on:
+      - spark-master
+    networks:
+      - kafka-network
+  
+  # spark-worker-3:
+  #   build:
+  #     context: ./spark_streaming/random_company
+  #   environment:
+  #     - SPARK_MODE=worker
+  #     - SPARK_MASTER_URL=spark://spark-master:7077
+  #   depends_on:
+  #     - spark-master
+  #   networks:
+  #     - kafka-network
+
+  # spark-worker-4:
+  # build:
+  #   context: ./spark_streaming/random_restaurant
+  # environment:
+  #   - SPARK_MODE=worker
+  #   - SPARK_MASTER_URL=spark://spark-master:7077
+  # depends_on:
+  #   - spark-master
+  # networks:
+  #   - kafka-network
+
+networks:
+  kafka-network:
