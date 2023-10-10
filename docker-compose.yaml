@@ -103,21 +103,6 @@ services:
     networks:
       - kafka-network
 
-  spark-streaming:
-    build: 
-      context: ./spark_streaming 
-    ports:
-      - 8082:8080
-    environment:
-      - SPARK_MODE=master
-    volumes:
-      - ./spark_streaming/spark_streaming.py:/app/spark_streaming.py
-      - spark-data:/app/spark/data
-    # depends_on:
-    #   - mongodb
-    networks:
-      - kafka-network
-
   mongodb:
     image: mongo:7
     restart: always
