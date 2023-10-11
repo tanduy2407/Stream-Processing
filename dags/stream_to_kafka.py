@@ -181,15 +181,12 @@ async def streaming_kafka():
 		tasks.append(asyncio.create_task(func()))
 	await asyncio.gather(*tasks)
 
+producer1 = KafkaProducer(bootstrap_servers=['kafka1:19092'])
+# producer2 = KafkaProducer(bootstrap_servers=['127.0.0.1:9093'])
+# producer3 = KafkaProducer(bootstrap_servers=['127.0.0.1:9094'])
+
 def main():
 	asyncio.run(streaming_kafka())
-	
-if __name__ == "__main__":
-	producer1 = KafkaProducer(bootstrap_servers=['kafka1:19092'])
-	# producer2 = KafkaProducer(bootstrap_servers=['127.0.0.1:9093'])
-	# producer3 = KafkaProducer(bootstrap_servers=['127.0.0.1:9094'])
-	main()
-	
 
 # kafka-server-start.bat D:\Apps\kafka_2.13-3.5.0\config\server-9093.properties
 # zookeeper-server-start.bat D:\Apps\kafka_2.13-3.5.0\config\zookeeper.properties

@@ -117,7 +117,7 @@ services:
     networks:
       - kafka-network
 
-  postgres-airflow:
+  postgres:
     image: postgres:13
     environment:
       POSTGRES_USER: airflow
@@ -133,14 +133,14 @@ services:
       context: ./airflow
     restart: always
     depends_on:
-      - postgres-airflow
+      - postgres
     environment:
       LOAD_EX: n
       EXECUTOR: Local
     volumes:
       - ./dags:/usr/local/airflow/dags
     ports:
-      - "8080:8080"
+      - 8080:8080
     command: webserver
     healthcheck:
       test:

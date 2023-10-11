@@ -13,7 +13,7 @@ default_args = {
     'retry_delay': timedelta(seconds=5)
 }
 
-with DAG('random_people_names', default_args=default_args, schedule_interval='0 1 * * *', catchup=False) as dag:
+with DAG('random_data', default_args=default_args, schedule_interval='0 1 * * *', catchup=False) as dag:
     data_stream = PythonOperator(
         task_id='kafka_data_stream',
         python_callable=main,

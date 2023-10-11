@@ -219,15 +219,11 @@ if __name__ == "__main__":
 	bootstrap_servers = sys.argv[1]
 	db_name = sys.argv[2]
 	namespace = sys.argv[3]
-	print('NAMESPACE:', namespace)
 	topic = collection = namespace.split('/')[1]
-
-	print(topic)
-	print(collection)
 	process_stream(bootstrap_servers, topic, namespace, db_name, collection)
 
 #spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0 spark_streaming.py
 
 #spark-submit --master local[2] --jars spark-sql-kafka-0-10_2.12-3.3.0.jar,mongo-spark-connector_2.12-10.2.0.jar spark_streaming.py
 
-#spark-submit --master local[2] spark_streaming.py kafka_streaming localhost:9092 beer/random_beer
+#spark-submit spark_streaming.py kafka1:19092 kafka_streaming beer/random_beer
