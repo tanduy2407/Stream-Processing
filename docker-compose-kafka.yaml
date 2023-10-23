@@ -155,9 +155,7 @@ services:
       - kafka-network
 
 volumes:
-  spark-data:
   mongo-data:
-  postgres_data:
 
 
 networks:

@@ -37,6 +37,7 @@ class SparkStreamProcessor:
 			"""
 			try:
 				spark = SparkSession.builder.appName('streaming') \
+					.config("spark.dynamicAllocation.enabled", "true") \
 					.getOrCreate()
 				logging.info('Spark session created successfully')
 			except Exception as err:
@@ -74,6 +75,7 @@ class SparkStreamProcessor:
 		Returns:
 			DataFrame: Processed DataFrame with appropriate schema and formatted timestamps.
 		"""
+		schema = None
 		if self.namespace == 'beer/random_beer':
 			schema = t.StructType([
 				t.StructField('id', t.IntegerType(), False),
@@ -216,6 +218,10 @@ def process_stream(bootstrap_servers, topic, namespace, db_name, collection):
 
 
 if __name__ == "__main__":
+	if len(sys.argv) < 3:
+		print('Usage: spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0 \
+     spark_streaming.py <host:port> <database> <namespace>')
+		exit(-1)
 	bootstrap_servers = sys.argv[1]
 	db_name = sys.argv[2]
 	namespace = sys.argv[3]
