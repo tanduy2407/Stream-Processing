@@ -11,6 +11,7 @@ Table of contents:
 * Apache Kafka
 * Apache Spark (Structured Streaming)
 * MongoDB
+* Docker
 
 # Information
 
@@ -37,7 +38,7 @@ This docker compose will create 2 new containers:
 
 Now you have a running Airflow container and you can access the UI at `https://localhost:8080`
 
-Manually trigger the Directed Acyclic Graph (DAG) to initiate the streaming process. Once triggered, the code begins retrieving data from the API and concurrently produces data into multiple topics in Kafka. This manual initiation allows for precise control over the streaming workflow, ensuring timely and synchronized data processing.
+Manual trigger the dag to start the streaming process. After triggering the dag, the code start retrieve data from API and produce data into multiple topics in Kafka concurrently.
 
 # Apache Kafka
 
