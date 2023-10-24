@@ -11,11 +11,10 @@ Table of contents:
 * Apache Kafka
 * Apache Spark (Structured Streaming)
 * MongoDB
-* Docker
 
 # Information
 
-![1697966918834](image/README/1697966918834.png)
+![1698164159465](image/README/1698164159465.png)
 
 Retrieve data from the Random API, transmit it to various Kafka topics at random intervals using Airflow. Utilize Spark Structured Streaming to read data from multiple Kafka topics and write them into MongoDB tables. Deploy this Spark application with one Master Node and several Worker Nodes via Docker.
 
@@ -38,7 +37,7 @@ This docker compose will create 2 new containers:
 
 Now you have a running Airflow container and you can access the UI at `https://localhost:8080`
 
-Manual trigger the dag to start the streaming process.
+Manually trigger the Directed Acyclic Graph (DAG) to initiate the streaming process. Once triggered, the code begins retrieving data from the API and concurrently produces data into multiple topics in Kafka. This manual initiation allows for precise control over the streaming workflow, ensuring timely and synchronized data processing.
 
 # Apache Kafka
 
@@ -64,7 +63,12 @@ To create multinodes in Spark standalone mode, run this command: `docker-compose
 
 This docker compose will create 7 new containers:
 
-* spark-master: This container establishes a Master node
+* **spark-master:** This container establishes a Master instance. It runs using `bitnami/spark` image version `3` from Dockerhub
+* **spark-worker-1, spark-worker-2, spark-worker-3, spark-worker-4, spark-worker-5, spark-worker-6:** These container establish 6 Worker instances, enabling parallel execution of Spark jobs. Each Worker node is configured to run 1 `spark-submit` command, allowing it to consume and process data from the corresponding topic before inserting the processed data into a MongoDB database. This parallel processing capability enhances the overall efficiency and throughput of the Spark cluster.
+
+**Advantage:* Each Worker node operates tasks independently, preventing conflicts between the spark-context of each Spark Session. This separation ensures smooth and efficient parallel processing within the Spark cluster, enhancing overall stability and performance.
+
+**Disadvantage:* Deploying multiple Worker nodes in parallel demands significant resources from the host machine, including CPU, RAM, and Disk space. This resource-intensive nature can pose challenges, especially for machines with limited capacities, potentially affecting overall system performance and responsiveness.
 
 # MongoDB
 
@@ -76,11 +80,9 @@ You can use the `-it` option with `docker exec` to run an interactive command in
 
 `docker exec -it <container_id_or_name> bash`
 
-To access the running database container with a specified username and password, you can use the following command:
+To access the running database container with a specified username and password, you can use the following commands:
 
 `mongosh - u <username> -p <password>`
-
-To access the running database container with a specified username and password, you can use the following command:
 
 `use <database>`
 
