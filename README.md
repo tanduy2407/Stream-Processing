@@ -15,7 +15,7 @@ Table of contents:
 
 # Information
 
-![1698164159465](image/README/1698164159465.png)
+![workflow](image/README/workflow.png)
 
 Retrieve data from the Random API, transmit it to various Kafka topics at random intervals using Airflow. Utilize Spark Structured Streaming to read data from multiple Kafka topics and write them into MongoDB tables. Deploy this Spark application with one Master Node and several Worker Nodes via Docker.
 
