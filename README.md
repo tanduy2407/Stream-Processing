@@ -61,7 +61,9 @@ This docker compose will create 7 new containers:
 
 [Spark Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html) is a scalable and fault-tolerant stream processing engine built on the Spark SQL engine.
 
-To create multinodes in Spark standalone mode, run this command: `docker-compose -f docker-compose-spark.yaml up -d.` This command will create a Spark cluster 1 Master node and 6 Worker node.
+To create multinodes in Spark Standalone mode with 1 Master node and 6 Worker nodes in a Spark cluster, run this command:
+
+`docker-compose -f docker-compose-spark.yaml up -d.` 
 
 This docker compose will create 7 new containers:
 
@@ -70,9 +72,10 @@ This docker compose will create 7 new containers:
 
 ***Spark Architecture:***
 
-* Master Node:
-* Cluster Manager:
-* Worker Node:
+* Master Node: split and schedule Spark jobs to be executed into executors in Spark cluster. SparkContext is a gateway which is created by driver to monitor the job and connect to cluster. Driver program call the application and create SparkContext
+* Spark Executor: is responsible to run a job and store data in cache. The executor run the application concurrectly. The executors are allocated dynamically and constantly added and removed during the execution of the tasks.
+* Cluster Manager: dynamically allocated resources to executors in Worker node.
+* Worker Node: execute jobs, return the results back to SparkContext, handle many jobs in parrellel by divide job into multiple sub-jobs on multiple machines.
 
 ![1698204389182](image/README/1698204389182.png)
 
