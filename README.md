@@ -11,7 +11,6 @@ Table of contents:
 * Apache Kafka
 * Apache Spark (Structured Streaming)
 * MongoDB
-* Docker
 
 # Information
 
@@ -23,22 +22,24 @@ Retrieve data from the Random API, transmit it to various Kafka topics at random
 
 `stream_to_kafka.py` -> The script that gets the data from API and sends it to Kafka topic
 
-`spark_streaming.py` -> The script that consumes the data from Kafka topic with Spark Structured Streaming
+`spark_streaming.py` -> The script that consumes the data from Kafka topics with Spark Structured Streaming
 
 # Apache Airflow
 
 [Apache Airflow™](https://airflow.apache.org/docs/apache-airflow/stable/index.html) is an open-source platform for developing, scheduling, and monitoring batch-oriented workflows.
 
-Run the docker-compose-airflow.yaml to start the Airflow container with Kafka and Spark container and necessary modules will automatically be installed: `docker-compose -f docker-compose-airflow.yaml up -d`
+Run the docker-compose-airflow.yaml to start the Airflow container, all necessary modules will be automatically installed:
+
+`docker-compose -f docker-compose-airflow.yaml up -d`
 
 This docker compose will create 2 new containers:
 
 * **postgres:** This container hosts a PostgreSQL database to store metadata from Airflow. It runs using the official PostgreSQL image from Dockerhub (image `postgresql` version `13`)
 * **webserver:** This container offers a graphical interface for users to interact. It is built from a custom image, derived from the `puckel/docker-airflow` image version `1.10.9`.
 
-Now you have a running Airflow container and you can access the UI at `https://localhost:8080`
+Once the Airflow container is up and running, you can access the UI at `https://localhost:8080`
 
-Manual trigger the dag to start the streaming process. After triggering the dag, the code start retrieve data from API and produce data into multiple topics in Kafka concurrently.
+Manually trigger the Directed Acyclic Graph (DAG) to initiate the streaming process. Once triggered, the code begins retrieving data from the API and concurrently produces data into multiple topics in Kafka. This manual initiation allows for precise control over the streaming workflow, ensuring timely and synchronized data processing.
 
 # Apache Kafka
 
@@ -67,6 +68,14 @@ This docker compose will create 7 new containers:
 * **spark-master:** This container establishes a Master instance. It runs using `bitnami/spark` image version `3` from Dockerhub
 * **spark-worker-1, spark-worker-2, spark-worker-3, spark-worker-4, spark-worker-5, spark-worker-6:** These container establish 6 Worker instances, enabling parallel execution of Spark jobs. Each Worker node is configured to run 1 `spark-submit` command, allowing it to consume and process data from the corresponding topic before inserting the processed data into a MongoDB database. This parallel processing capability enhances the overall efficiency and throughput of the Spark cluster.
 
+***Spark Architecture:***
+
+* Master Node:
+* Cluster Manager:
+* Worker Node:
+
+![1698204389182](image/README/1698204389182.png)
+
 **Advantage:* Each Worker node operates tasks independently, preventing conflicts between the spark-context of each Spark Session. This separation ensures smooth and efficient parallel processing within the Spark cluster, enhancing overall stability and performance.
 
 **Disadvantage:* Deploying multiple Worker nodes in parallel demands significant resources from the host machine, including CPU, RAM, and Disk space. This resource-intensive nature can pose challenges, especially for machines with limited capacities, potentially affecting overall system performance and responsiveness.
@@ -75,7 +84,7 @@ This docker compose will create 7 new containers:
 
 [MongoDB](https://www.mongodb.com/what-is-mongodb) is a No-SQL database to store data in flexible, JSON-like documents.
 
-When executing the command `docker-compose -f docker-compose-kafka.yaml up -d` , a MongoDB database container will be created. This containerl automatically create database and collections when starting by mounting the Javascript file `mongo/mongo-init` into `docker-entrypoint-initdb.d`
+When executing the command `docker-compose -f docker-compose-kafka.yaml up -d` , a MongoDB database container will be created. This container automatically create database and collections when starting by mounting the Javascript file `mongo/mongo-init.js` into `docker-entrypoint-initdb.d`
 
 You can use the `-it` option with `docker exec` to run an interactive command inside the container:
 
