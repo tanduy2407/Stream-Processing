@@ -14,7 +14,7 @@ Table of contents:
 
 # Information
 
-![workflow](image/README/workflow.png)
+![1698287104818](image/README/1698287104818.png)
 
 Retrieve data from the Random API, transmit it to various Kafka topics at random intervals using Airflow. Utilize Spark Structured Streaming to read data from multiple Kafka topics and write them into MongoDB tables. Deploy this Spark application with one Master Node and several Worker Nodes via Docker.
 
@@ -26,7 +26,7 @@ Retrieve data from the Random API, transmit it to various Kafka topics at random
 
 # Apache Airflow
 
-[Apache Airflow™](https://airflow.apache.org/docs/apache-airflow/stable/index.html) is an open-source platform for developing, scheduling, and monitoring batch-oriented workflows.
+[Apache Airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html) is an open-source platform for developing, scheduling, and monitoring batch-oriented workflows.
 
 Run the docker-compose-airflow.yaml to start the Airflow container, all necessary modules will be automatically installed:
 
@@ -55,15 +55,19 @@ This docker compose will create 7 new containers:
 * **kafka-ui:** This container provides a versatile, fast, and lightweight web user interface for managing Kafka clusters. It runs using the `provectuslabs/kafka-ui` image version `latest` from Dockerhub
 * **mongodb:** This container sets up a MongoDB database to store data from Kafka topics. It operates using the `mongo` image version `7` from Dockerhub.
 
+Kafka Architecture:
+
+Kafka Cluster Architecture:
+
 # Apache Spark (Structured Streaming)
 
-[Apache Spark**™**](https://spark.apache.org/) is a multi-language engine for executing data engineering, data science, and machine learning on single-node machines or clusters.
+[Apache Spark](https://spark.apache.org/) is a multi-language engine for executing data engineering, data science, and machine learning on single-node machines or clusters.
 
 [Spark Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html) is a scalable and fault-tolerant stream processing engine built on the Spark SQL engine.
 
 To create multinodes in Spark Standalone mode with 1 Master node and 6 Worker nodes in a Spark cluster, run this command:
 
-`docker-compose -f docker-compose-spark.yaml up -d.` 
+`docker-compose -f docker-compose-spark.yaml up -d.`
 
 This docker compose will create 7 new containers:
 
