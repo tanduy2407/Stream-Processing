@@ -55,9 +55,15 @@ This docker compose will create 7 new containers:
 * **kafka-ui:** This container provides a versatile, fast, and lightweight web user interface for managing Kafka clusters. It runs using the `provectuslabs/kafka-ui` image version `latest` from Dockerhub
 * **mongodb:** This container sets up a MongoDB database to store data from Kafka topics. It operates using the `mongo` image version `7` from Dockerhub.
 
-Kafka Architecture:
-
 Kafka Cluster Architecture:
+
+* Producer:
+* Consumer:
+* Zookeeper:
+* Broker:
+* Topic:
+
+![1699500960374](image/README/1699500960374.png)
 
 # Apache Spark (Structured Streaming)
 
