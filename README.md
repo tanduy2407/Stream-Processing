@@ -18,11 +18,11 @@ Table of contents:
 
 Retrieve data from the Random API, transmit it to various Kafka topics at random intervals using Airflow. Utilize Spark Structured Streaming to read data from multiple Kafka topics and write them into MongoDB tables. Deploy this Spark application with one Master Node and several Worker Nodes via Docker.
 
-`stream_to_kafka_dag.py` -> The DAG script that writes the API data to Kafka producer
+`dags/stream_to_kafka_dag.py` -> The DAG script that writes the API data to Kafka producer
 
-`stream_to_kafka.py` -> The script that gets the data from API and sends it to Kafka topic
+`dags/stream_to_kafka.py` -> The script that gets the data from API and sends it to Kafka topic
 
-`spark_streaming.py` -> The script that consumes the data from Kafka topics with Spark Structured Streaming
+`spark_streaming/spark_streaming.py` -> The script that consumes the data from Kafka topics with Spark Structured Streaming
 
 # Apache Airflow
 
@@ -55,13 +55,13 @@ This docker compose will create 7 new containers:
 * **kafka-ui:** This container provides a versatile, fast, and lightweight web user interface for managing Kafka clusters. It runs using the `provectuslabs/kafka-ui` image version `latest` from Dockerhub
 * **mongodb:** This container sets up a MongoDB database to store data from Kafka topics. It operates using the `mongo` image version `7` from Dockerhub.
 
-Kafka Cluster Architecture:
+***Kafka Cluster Architecture:***
 
-* Producer:
-* Consumer:
-* Zookeeper:
-* Broker:
-* Topic:
+* Broker: handle hundreds of thousands of read and write per second without performance impact.
+* Producer: publish messages to brokers when start, automatically connect to another Producers.
+* Consumer: subscribe data from brokers, keeps track of how many messages have been consumed by keeping track of the partition offset.
+* Zookeeper: coordinate, manage and report status of Kafka broker in Kafka system, perform Kafka broker - leader election. Send the notifications of presence or absence of broker, producers and consumers make the decision and begin coordinating their work with another broker.
+* Topic: stream of data, data in topic was organised with FIFO rule.
 
 ![1699500960374](image/README/1699500960374.png)
 
@@ -82,7 +82,7 @@ This docker compose will create 7 new containers:
 
 ***Spark Architecture:***
 
-* Master Node: split and schedule Spark jobs to be executed into executors in Spark cluster. SparkContext is a gateway which is created by driver to monitor the job and connect to cluster. Driver program call the application and create SparkContext
+* Master Node: split and schedule Spark jobs to be executed into executors in Spark cluster. SparkContext is a gateway which is created by driver to monitor the job and connect to cluster. Driver program call the application and create SparkContext.
 * Spark Executor: is responsible to run a job and store data in cache. The executor run the application concurrectly. The executors are allocated dynamically and constantly added and removed during the execution of the tasks.
 * Cluster Manager: dynamically allocated resources to executors in Worker node.
 * Worker Node: execute jobs, return the results back to SparkContext, handle many jobs in parrellel by divide job into multiple sub-jobs on multiple machines.
