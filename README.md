@@ -57,11 +57,11 @@ This docker compose will create 7 new containers:
 
 ***Kafka Cluster Architecture:***
 
-* Broker: handle hundreds of thousands of read and write per second without performance impact.
-* Producer: publish messages to brokers when start, automatically connect to another Producers.
-* Consumer: subscribe data from brokers, keeps track of how many messages have been consumed by keeping track of the partition offset.
+* Broker: handle hundreds of thousands of read and write per second without performance impact
+* Producer: Publish messages to brokers when start, automatically connect to another Producers
+* Consumer: Subscribe data from brokers, keeps track of how many messages have been consumed by keeping track of the partition offset
 * Zookeeper: coordinate, manage and report status of Kafka broker in Kafka system, perform Kafka broker - leader election. Send the notifications of presence or absence of broker, producers and consumers make the decision and begin coordinating their work with another broker.
-* Topic: stream of data, data in topic was organised with FIFO rule.
+* Topic: stream of data, data in topic was organised with FIFO rule
 
 ![1699500960374](image/README/1699500960374.png)
 
