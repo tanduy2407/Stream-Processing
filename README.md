@@ -45,7 +45,7 @@ Manually trigger the Directed Acyclic Graph (DAG) to initiate the streaming proc
 
 [Apache Kafka](https://kafka.apache.org/) is an open-source distributed event streaming platform used by thousands of companies for high-performance data pipelines, streaming analytics, data integration, and mission-critical applications.
 
-Run this command: `docker-compose -f docker-compose-kafka.yaml up -d` to create multinode Kafka cluster for streaming process, we define the replication factor as 3 since there are 3 nodes (kafka1, kafka2, kafka3). We can also see the Kafka UI on `localhost:8888`.
+Run this command: `docker-compose -f docker-compose-kafka.yaml up -d` to create multinode Kafka cluster for streaming process, we define the replication factor as 3 since there are 3 nodes (*kafka1, kafka2, kafka3*). We can also see the Kafka UI on `localhost:8888`.
 
 This docker compose will create 7 new containers:
 
@@ -57,11 +57,11 @@ This docker compose will create 7 new containers:
 
 ***Kafka Cluster Architecture:***
 
-* Broker: handle hundreds of thousands of read and write per second without performance impact
-* Producer: Publish messages to brokers when start, automatically connect to another Producers
-* Consumer: Subscribe data from brokers, keeps track of how many messages have been consumed by keeping track of the partition offset
+* Broker: handle hundreds of thousands of read and write per second without performance impact.
+* Producer: Publish messages to brokers when start, automatically connect to another Producers.
+* Consumer: Subscribe data from brokers, keeps track of how many messages have been consumed by keeping track of the partition offset.
 * Zookeeper: coordinate, manage and report status of Kafka broker in Kafka system, perform Kafka broker - leader election. Send the notifications of presence or absence of broker, producers and consumers make the decision and begin coordinating their work with another broker.
-* Topic: stream of data, data in topic was organised with FIFO rule
+* Topic: stream of data was organised with FIFO rule. The default retention time for data in a topic is 7 days before automatically deleted, this period can be configured and adjusted based on the specific use case and requirements.
 
 ![1699500960374](image/README/1699500960374.png)
 
@@ -78,7 +78,7 @@ To create multinodes in Spark Standalone mode with 1 Master node and 6 Worker no
 This docker compose will create 7 new containers:
 
 * **spark-master:** This container establishes a Master instance. It runs using `bitnami/spark` image version `3` from Dockerhub
-* **spark-worker-1, spark-worker-2, spark-worker-3, spark-worker-4, spark-worker-5, spark-worker-6:** These container establish 6 Worker instances, enabling parallel execution of Spark jobs. Each Worker node is configured to run 1 `spark-submit` command, allowing it to consume and process data from the corresponding topic before inserting the processed data into a MongoDB database. This parallel processing capability enhances the overall efficiency and throughput of the Spark cluster.
+* **spark-worker-1, spark-worker-2, spark-worker-3, spark-worker-4, spark-worker-5, spark-worker-6:** These container establish 6 Worker instances, enabling parallel execution of Spark jobs. Each Worker node is configured to run `spark-submit` command, allowing it to consume and process data from the corresponding topic before inserting the processed data into a MongoDB database. This parallel processing capability enhances the overall efficiency and throughput of the Spark cluster.
 
 ***Spark Architecture:***
 
